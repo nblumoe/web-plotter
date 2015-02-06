@@ -1,0 +1,109 @@
+#+TITLE: Web Plotter - Plotting from Incanter to Websites
+#+AUTHOR: Nils Blum-Oeste
+#+EMAIL: nils@blum-oeste.de
+#+LANGUAGE: en
+#+STARTUP: align hidestars lognotestate
+#+INFOJS_OPT: view:info toc:nil
+#+HTML_HEAD: <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+#+HTML_HEAD: <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/monokai.min.css">
+#+HTML_HEAD: <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+#+HTML_HEAD: <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/clojure.min.js"></script>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="resources/htmlize.css" />
+#+HTML_HEAD: <script src="resources/export.js"></script>
+#+OPTIONS: :html-include-style t
+
+* Introduction
+  This is my first try with literate programming. I am going to do some simple plotting with Incanter to HTML using NVD3
+  and following the Clojure Data Analysis Cookbook.
+
+  #+BEGIN_SRC clojure :exports both
+    (+ 1 1)
+  #+END_SRC
+
+  #+RESULTS:
+  : 2
+
+* Leiningen Project
+
+** Project definition
+
+   #+BEGIN_SRC clojure :tangle project.clj
+     (defproject web-plotter "0.1.0-SNAPSHOT"
+       :description "plotting with Incanter and NVD3"
+       :url "http://example.com/FIXME"
+       :license {:name "Eclipse Public License"
+                 :url "http://www.eclipse.org/legal/epl-v10.html"}
+       :dependencies [[org.clojure/clojure "1.6.0"]
+                      [ring/ring-core "1.3.2"]
+                      [ring/ring-jetty-adapter "1.3.2"]
+                      [compojure "1.3.1"]]
+       :plugins [[lein-ring "0.9.1"]]
+       :ring {:handler web-plotter.server/app})
+   #+END_SRC
+
+** README
+
+** License note
+
+* Application
+
+** core
+
+   #+BEGIN_SRC clojure :tangle src/web_plotter/core.clj
+     (ns web-plotter.core)
+   #+END_SRC
+
+   #+RESULTS:
+
+** Server
+
+   Set up the namespace for the server.
+
+   #+BEGIN_SRC  :tangle src/web_plotter/server.clj
+     (ns web-plotter.server
+       (:require [compojure.route :as route]
+                 [compojure.handler :as handler]
+                 [clojure.string :as str])
+       (:use compojure.core
+             ring.adapter.jetty
+             [ring.middleware.content-type :only (wrap-content-type)]
+             [ring.middleware.file :only (wrap-file)]
+             [ring.middleware.file-info :only (wrap-file-info)]
+             [ring.middleware.stacktrace :only (wrap-stacktrace)]
+             [ring.util.response :only (redirect)]))
+   #+END_SRC
+
+   Define the routes of the server. The root path will be redirected to the json data.
+   The resources directory get served as static files. If no matching route is found, return an error message.
+
+   #+BEGIN_SRC  :tangle src/web_plotter/server.clj
+     (defroutes
+       site-routes
+       (GET "/" [] (redirect "/data.json"))
+       (route/resources "/")
+       (route/not-found "Page not found"))
+   #+END_SRC
+
+   Set up the app request handler. Middlewares for serving static files, adding file info and setting content-type
+   headers are wrapped around the response.
+
+   #+BEGIN_SRC  :tangle src/web_plotter/server.clj
+     (def app
+       (-> (handler/site site-routes)
+         (wrap-file "resources")
+         (wrap-file-info)
+         (wrap-content-type)))
+   #+END_SRC
+
+* Data
+
+  Some hardcoded dummy data to use for plotting.
+
+  #+BEGIN_SRC js :tangle resources/data.json
+    { "set1":
+      {
+        "x": [1, 2, 3],
+        "y": [4,5,6]
+      }
+    }
+  #+END_SRC
