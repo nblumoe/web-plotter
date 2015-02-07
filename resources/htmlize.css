@@ -2294,13 +2294,13 @@
       }
 
       a {
-        color: inherit;
+        color: #428BB6;
         background-color: inherit;
         font: inherit;
         text-decoration: inherit;
       }
       a:hover {
-        text-decoration: underline;
+        color: #0062A9;
       }
     -->
 </style>

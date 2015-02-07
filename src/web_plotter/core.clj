@@ -1,2 +1,1 @@
-
 (ns web-plotter.core)
