@@ -168,7 +168,8 @@
        (route/not-found "Page not found"))
      #+END_SRC
 
-    - The root path will be redirected to the json data.
+    - The root path will shown an index page
+    - The /scatter path serves the scatter plot page and the data from resources directory too
     - The resources directory gets served as static files from the web server root path.
     - If no matching route is found, return an error message.
 

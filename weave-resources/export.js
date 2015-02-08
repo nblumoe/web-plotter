@@ -8,4 +8,3 @@ $(document).ready(function() {
     hljs.highlightBlock(block);
   });
 });
-console.log(" foo bar");
