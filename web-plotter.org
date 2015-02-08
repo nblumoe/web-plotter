@@ -8,30 +8,20 @@
 #+HTML_HEAD: <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/monokai.min.css">
 #+HTML_HEAD: <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
 #+HTML_HEAD: <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/clojure.min.js"></script>
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="resources/htmlize.css" />
-#+HTML_HEAD: <script src="resources/export.js"></script>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="org-export/htmlize.css" />
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+#+HTML_HEAD: <script src="org-export/export.js"></script>
 #+OPTIONS: :html-include-style t
 
 * Introduction
   This is my first try with literate programming. I am going to do some simple plotting with Incanter to HTML using NVD3
   and following the Clojure Data Analysis Cookbook.
 
-** Literate Programming Example
-
-   Here is a plain simple example for Literate Programming. The application code is included in this document. Via
-   "tangling" the application's source code files are generated. Output from instructions can also be included in this
-   document, as this example shows:
-
-   #+BEGIN_SRC clojure :exports both
-     (+ 1 1)
-   #+END_SRC
-
-   #+RESULTS:
-   : 2
-
-* Leiningen Project
-
+* Project
 ** Project definition
+
+   Project dependencies can be check for new versions via `lein ancient`. An upgrade can be done with `lein ancient
+   upgrade`. lein-ancient is not part of the project and should be instaled in the user profiles `~/.lein/profiles.clj`.
 
    #+BEGIN_SRC clojure :tangle project.clj
    (defproject web-plotter "0.1.0-SNAPSHOT"
@@ -58,23 +48,19 @@
 
 ** README
 
+   #+BEGIN_SRC markdown :tangle README.md
+   # Web Plotter
+
+   #+END_SRC
+
 ** License note
 
 * Application
-
-** core
-
-   #+BEGIN_SRC clojure :tangle src/web_plotter/core.clj
-     (ns web-plotter.core)
-   #+END_SRC
-
-   #+RESULTS:
-
 ** Server
 
    The backend application.
 
-***  Namespace setup
+*** Namespace setup
 
     #+BEGIN_SRC clojure :tangle src/web_plotter/server.clj
     (ns web-plotter.server
@@ -95,24 +81,72 @@
     Ring is used via jetty for handling HTTP requests and Compojure for routing. ([[*Ring concepts][Ring concepts]])
     Hiccup renders Clojure data structures to HTML.
 
+*** Hiccup Templates
+**** Index
 
-*** Index page
+     Rendering an index page via Hiccup. The provided Clojure datastructure is mapped to HTML and should be easy to
+     understand.
 
-    Rendering an index page via Hiccup. The provided Clojure datastructure is mapped to HTML and should be easy to
-    understand.
+     #+BEGIN_SRC clojure :tangle src/web_plotter/server.clj
+     (defn index-page []
+       (html5
+         [:head
+          [:title "Web Plotter"]]
+         [:body
+          [:h1 {:id "web-plotter"} "Web Plotter"]
+          [:ol
+           [:li [:a {:href "scatter"} "Scatter plot"]]
+           [:li [:a {:href "data/example.json"} "Some example data"]]]
+          (include-js "js/main.js")]))
+     #+END_SRC
 
-    #+BEGIN_SRC clojure :tangle src/web_plotter/server.clj
-    (defn index-page []
-      (html5
-        [:head
-         [:title "Web Plotter"]]
-        [:body
-         [:h1 {:id "web-plotter"} "Web Plotter"]
-         [:ol
-          [:li [:a {:href "/data.json"} "Some example data"]]]
-         (include-js "js/main.js")
-         (javascript-tag "web_plotter.core.hello('from me ');")]))
-    #+END_SRC
+**** NVD3 layout
+
+     Page layout for rendering NVD3 plots.
+
+     Title and HTML body contents will be inserted, as well as a JS snippet to initialize the plotting.
+     Additional JS files can be included via the optional parameter.
+
+     #+BEGIN_SRC clojure :tangle src/web_plotter/server.clj
+     (defn d3-page
+       [title js body & {:keys [extra-js] :or {extra-js []}}]
+       (html5
+         [:head
+          [:title title]
+          (include-css "/css/nv.d3.css")
+          (include-css "/css/main.css")
+          (include-css "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
+          (include-css "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.2.2/css/material-wfont.min.css")
+          ]
+         [:body
+           (concat
+             [body]
+             [ (include-js "http://d3js.org/d3.v3.min.js")
+               (include-js "https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.7.0/nv.d3.min.js")
+               (include-js "https://code.jquery.com/jquery-2.1.3.min.js")
+               (include-js "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js")
+               (include-js "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.2.2/js/material.min.js")]
+             (map include-js extra-js)
+             [(include-js "js/main.js")
+              (javascript-tag js)])]))
+     #+END_SRC
+
+**** Scatter plot page
+
+     An example page for a scatter plot. Uses the NVD3 page template.
+
+     #+BEGIN_SRC clojure :tangle src/web_plotter/server.clj
+     (defn scatter-plot-page []
+       (d3-page "Scatter Plot"
+         "web_plotter.scatter.scatter_plot();"
+         [:div.container
+          [:div.row
+           [:div.col-md-12
+            [:h1 "Scatter Plot"]]]
+          [:div.row
+           [:div.col-md-12
+            [:div#scatter.chart [:svg]]]]]))
+     #+END_SRC
 
 *** Routes
     Define the routes of the server via Compojure.
@@ -121,18 +155,20 @@
     the HTTP verb, a path, parameters and a response.
 
      #+BEGIN_SRC clojure :tangle src/web_plotter/server.clj
-       (defroutes
-         site-routes
-         (GET "/" [] (index-page))
-         (route/resources "/")
-         (route/not-found "Page not found"))
+     (defroutes
+       site-routes
+       (GET "/" [] (index-page))
+       (GET "/scatter" [] (scatter-plot-page))
+       (GET "/scatter/data.json" [] (redirect "/data/census-race.json"))
+       (route/resources "/")
+       (route/not-found "Page not found"))
      #+END_SRC
 
     - The root path will be redirected to the json data.
     - The resources directory gets served as static files from the web server root path.
     - If no matching route is found, return an error message.
 
-*** Specify request handling
+*** Request handling
 
      Set up the app request handler which was build with Compojure. Middlewares for serving static files, adding file
      info and setting content-type headers are wrapped around the handler.
@@ -145,27 +181,139 @@
            (wrap-content-type)))
      #+END_SRC
 
-
 ** Client
-   #+BEGIN_SRC clojure :tangle src-cljs/web_plotter/core.cljs
-   (ns web-plotter.core)
 
-   (defn ^:export hello [world]
-     (js/alert (str "Hello " world)))
+   Client side code.
 
-   #+END_SRC
-* Data
+*** Core NVD3 helper functions
 
-  Some hardcoded dummy data to use for plotting.
+    Namespace definition.
 
-  #+BEGIN_SRC js :tangle resources/data.json
-    { "set1":
-      {
-        "x": [1, 2, 3],
-        "y": [4,5,6]
-      }
-    }
-  #+END_SRC
+    #+BEGIN_SRC clojure :tangle src-cljs/web_plotter/core.cljs
+    (ns web-plotter.core)
+    #+END_SRC
+
+    Define two types for NVD3.
+
+    #+BEGIN_SRC clojure :tangle src-cljs/web_plotter/core.cljs
+    (deftype Group [key values])
+
+    (deftype Point [x y size])
+    #+END_SRC
+
+    A function to add a label to an axis.
+
+    #+BEGIN_SRC clojure :tangle src-cljs/web_plotter/core.cljs
+    (defn add-label
+      [chart axis label]
+      (if-not (nil? label)
+        (.axisLabel (aget chart axis) label)))
+
+    #+END_SRC
+
+    Add labels to both axes.
+
+    #+BEGIN_SRC clojure :tangle src-cljs/web_plotter/core.cljs
+    (defn add-axes-labels
+      [chart x-label y-label]
+      (doto chart
+        (add-label "xAxis" x-label)
+        (add-label "yAxis" y-label)))
+
+    #+END_SRC
+
+    Populating a chart with data and plotting it.
+
+    #+BEGIN_SRC clojure :tangle src-cljs/web_plotter/core.cljs
+    (defn populate-node
+      [selector chart groups transition continuation]
+      (-> (.select js/d3 selector)
+        (.datum groups)
+        (.transition)
+        (.duration 50000)
+        (.call chart)
+        (.call continuation)))
+
+    #+END_SRC
+
+    Get data from an URL and create a plot with labelled axes from the data.
+
+    #+BEGIN_SRC clojure :tangle src-cljs/web_plotter/core.cljs
+    (defn create-chart
+      [data-url selector make-chart json->groups &
+       {:keys [transition continuation x-label y-label]
+        :or {transition false continuation (fn [_])
+             x-label nil, y-label nil}}]
+      (.json js/d3 data-url
+        (fn [error data]
+          (when data
+            (.addGraph js/nv
+              (fn [] (let [chart (make-chart)]
+                      (add-axes-labels chart x-label y-label)
+                      (populate-node selector chart (json->groups data)
+                        transition continuation)
+                      (.windowResize js/nv.utils #(.update chart)))))))))
+    #+END_SRC
+
+*** Scatter plots
+
+    #+BEGIN_SRC clojure :tangle src-cljs/web_plotter/scatter.cljs
+    (ns web-plotter.scatter
+      (:require [web-plotter.core :as web-plotter]))
+
+    (defn sum-by [key-fn coll]
+      (reduce + 0 (map key-fn coll)))
+
+    (defn sum-values [key-fn coll]
+      (reduce
+        (fn [m [k vs]] (assoc m k (sum-by key-fn vs)))
+        {}
+        coll))
+
+
+    (defn sum-data-fields [json]
+      (let [by-state (group-by #(.-state_name %) json)
+            white-by-state (sum-values #(.-white %) by-state)
+            afam-by-state (sum-values #(.-black %) by-state)
+            total-by-state (sum-values #(.-total %) by-state)]
+        (map #(hash-map :state %
+                :white (white-by-state %)
+                :black (afam-by-state %)
+                :total (total-by-state %))
+          (keys by-state))))
+
+    (defn ->nv [item]
+      (let [{:keys [white black]} item]
+        (web-plotter/Point. (/ white 1000) (/ black 1000) 1)))
+
+    (defn ->nv-data [key-name data]
+      (->> data
+        sum-data-fields
+        (map ->nv)
+        (apply array)
+        (web-plotter/Group. key-name)
+        (array)))
+
+    (defn make-chart []
+      (let [c (-> (.scatterChart js/nv.models)
+                (.showDistX true)
+                (.showDistY true)
+                (.useVoronoi false)
+                (.color (.. js/d3 -scale category10 range)))]
+        (.tickFormat (.-xAxis c) (.format js/d3 "d"))
+        (.tickFormat (.-yAxis c) (.format js/d3 "d"))
+        c))
+
+    (defn ^:export scatter-plot []
+      (web-plotter/create-chart
+        "/scatter/data.json"
+        "#scatter svg"
+        make-chart
+        (partial ->nv-data "Racial Data")
+        :x-label "Population, whites, by thousands"
+        :y-label "Population, African-Americans, by thousands"
+        :transition true))
+    #+END_SRC
 * Appendix
 ** Ring concepts
    - Handlers :: Ring handlers are Clojure functions taking a map representing the HTTP requests as an argument and

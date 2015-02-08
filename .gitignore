@@ -7,3 +7,7 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
+README.md
+src
+src-cljs
+resources/js/main.js
