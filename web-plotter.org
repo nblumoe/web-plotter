@@ -99,8 +99,7 @@
          [:body
           [:h1 {:id "web-plotter"} "Web Plotter"]
           [:ol
-           [:li [:a {:href "scatter"} "Scatter plot"]]
-           [:li [:a {:href "data/example.json"} "Some example data"]]]
+           [:li [:a {:href "scatter"} "Scatter plot"]]]
           (include-js "js/main.js")]))
      #+END_SRC
 
@@ -117,10 +116,10 @@
        (html5
          [:head
           [:title title]
-          (include-css "/css/nv.d3.css")
-          (include-css "/css/main.css")
+          (include-css "https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.7.0/nv.d3.min.css")
           (include-css "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
           (include-css "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.2.2/css/material-wfont.min.css")
+          (include-css "/css/main.css")
           ]
          [:body
            (concat
@@ -274,7 +273,6 @@
         (fn [m [k vs]] (assoc m k (sum-by key-fn vs)))
         {}
         coll))
-
 
     (defn sum-data-fields [json]
       (let [by-state (group-by #(.-state_name %) json)
