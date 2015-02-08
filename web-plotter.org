@@ -5,12 +5,12 @@
 #+STARTUP: align hidestars lognotestate
 #+INFOJS_OPT: view:info toc:nil
 #+HTML_HEAD: <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-#+HTML_HEAD: <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/monokai.min.css">
 #+HTML_HEAD: <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
 #+HTML_HEAD: <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/clojure.min.js"></script>
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="org-export/htmlize.css" />
+#+HTML_HEAD: <script src="weave-resources/export.js"></script>
+#+HTML_HEAD: <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/monokai.min.css">
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
-#+HTML_HEAD: <script src="org-export/export.js"></script>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="weave-resources/htmlize.css" />
 #+OPTIONS: :html-include-style t
 
 * Introduction
