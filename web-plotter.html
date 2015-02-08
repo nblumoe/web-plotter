@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Web Plotter - Plotting from Incanter to Websites</title>
+<!-- 2015-02-08 So 10:13 -->
+<meta  charset="utf-8">
+<meta  name="generator" content="Org-mode">
+<meta  name="author" content="Nils Blum-Oeste">
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/clojure.min.js"></script>
+<script src="weave-resources/export.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/monokai.min.css">
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="weave-resources/htmlize.css" />
+
+<script type="text/javascript" src="http://orgmode.org/org-info.js">
+/**
+ *
+ * @source: http://orgmode.org/org-info.js
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in http://orgmode.org/org-info.js.
+ *
+ * Copyright (C) 2012-2013 Free Software Foundation, Inc.
+ *
+ *
+ * The JavaScript code in this tag is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in http://orgmode.org/org-info.js.
+ *
+ */
+</script>
+
+<script type="text/javascript">
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+
+<!--/*--><![CDATA[/*><!--*/
+org_html_manager.set("TOC_DEPTH", "3");
+org_html_manager.set("LINK_HOME", "");
+org_html_manager.set("LINK_UP", "");
+org_html_manager.set("LOCAL_TOC", "1");
+org_html_manager.set("VIEW_BUTTONS", "0");
+org_html_manager.set("MOUSE_HINT", "underline");
+org_html_manager.set("FIXED_TOC", "0");
+org_html_manager.set("TOC", "0");
+org_html_manager.set("VIEW", "info");
+org_html_manager.setup();  // activate after the parameters are set
+/*]]>*///-->
+</script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Web Plotter - Plotting from Incanter to Websites</h1>
+<nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Introduction</a></li>
+<li><a href="#sec-2">2. Project</a>
+<ul>
+<li><a href="#sec-2-1">2.1. Project definition</a></li>
+<li><a href="#sec-2-2">2.2. README</a></li>
+<li><a href="#sec-2-3">2.3. License note</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. Application</a>
+<ul>
+<li><a href="#sec-3-1">3.1. Server</a>
+<ul>
+<li><a href="#sec-3-1-1">3.1.1. Namespace setup</a></li>
+<li><a href="#sec-3-1-2">3.1.2. Hiccup Templates</a></li>
+<li><a href="#sec-3-1-3">3.1.3. Routes</a></li>
+<li><a href="#sec-3-1-4">3.1.4. Request handling</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-2">3.2. Client</a>
+<ul>
+<li><a href="#sec-3-2-1">3.2.1. Core NVD3 helper functions</a></li>
+<li><a href="#sec-3-2-2">3.2.2. Scatter plots</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-4">4. Appendix</a>
+<ul>
+<li><a href="#sec-4-1">4.1. Ring concepts</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This is my first try with literate programming. I am going to do some simple plotting with Incanter to HTML using NVD3
+and following the Clojure Data Analysis Cookbook.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Project</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Project definition</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Project dependencies can be check for new versions via `lein ancient`. An upgrade can be done with `lein ancient
+upgrade`. lein-ancient is not part of the project and should be instaled in the user profiles `~/.lein/profiles.clj`.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defproject web-plotter "0.1.0-SNAPSHOT"
+  :description "plotting with Incanter and NVD3"
+  :url "http://example.com/FIXME"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [ring/ring-core "1.3.2"]
+                 [ring/ring-jetty-adapter "1.3.2"]
+                 [compojure "1.3.1"]
+                 [hiccup "1.0.5"]
+                 [org.clojure/clojurescript "0.0-2760"]]
+  :plugins [[lein-ring "0.9.1"]
+            [lein-cljsbuild "1.0.4"]]
+  :ring {:handler web-plotter.server/app}
+  :cljsbuild {:builds
+              [{:source-paths ["src-cljs"]
+                :compiler
+                {:output-to "resources/js/main.js"
+                 :optimizations :whitespace
+                 :pretty-print true}}]})
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> README</h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="org-src-container">
+
+<pre class="src src-markdown"># Web Plotter
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> License note</h3>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Application</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Server</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+The backend application.
+</p>
+</div>
+
+<div id="outline-container-sec-3-1-1" class="outline-4">
+<h4 id="sec-3-1-1"><span class="section-number-4">3.1.1</span> Namespace setup</h4>
+<div class="outline-text-4" id="text-3-1-1">
+<div class="org-src-container">
+
+<pre class="src src-clojure">(ns web-plotter.server
+  (:require [compojure.route :as route]
+            [compojure.handler :as handler]
+            [clojure.string :as str])
+  (:use compojure.core
+        ring.adapter.jetty
+        [ring.middleware.content-type :only (wrap-content-type)]
+        [ring.middleware.file :only (wrap-file)]
+        [ring.middleware.file-info :only (wrap-file-info)]
+        [ring.middleware.stacktrace :only (wrap-stacktrace)]
+        [ring.util.response :only (redirect)]
+        [hiccup core element page]
+        [hiccup.middleware :only (wrap-base-url)]))
+</pre>
+</div>
+
+<p>
+Ring is used via jetty for handling HTTP requests and Compojure for routing. (<a href="#sec-4-1">Ring concepts</a>)
+Hiccup renders Clojure data structures to HTML.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-1-2" class="outline-4">
+<h4 id="sec-3-1-2"><span class="section-number-4">3.1.2</span> Hiccup Templates</h4>
+<div class="outline-text-4" id="text-3-1-2">
+</div><ol class="org-ol"><li><a id="sec-3-1-2-1"></a>Index<br ><div class="outline-text-5" id="text-3-1-2-1">
+<p>
+Rendering an index page via Hiccup. The provided Clojure datastructure is mapped to HTML and should be easy to
+understand.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defn index-page []
+  (html5
+    [:head
+     [:title "Web Plotter"]]
+    [:body
+     [:h1 {:id "web-plotter"} "Web Plotter"]
+     [:ol
+      [:li [:a {:href "scatter"} "Scatter plot"]]
+      [:li [:a {:href "data/example.json"} "Some example data"]]]
+     (include-js "js/main.js")]))
+</pre>
+</div>
+</div></li>
+
+<li><a id="sec-3-1-2-2"></a>NVD3 layout<br ><div class="outline-text-5" id="text-3-1-2-2">
+<p>
+Page layout for rendering NVD3 plots.
+</p>
+
+<p>
+Title and HTML body contents will be inserted, as well as a JS snippet to initialize the plotting.
+Additional JS files can be included via the optional parameter.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defn d3-page
+  [title js body &amp; {:keys [extra-js] :or {extra-js []}}]
+  (html5
+    [:head
+     [:title title]
+     (include-css "/css/nv.d3.css")
+     (include-css "/css/main.css")
+     (include-css "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
+     (include-css "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.2.2/css/material-wfont.min.css")
+     ]
+    [:body
+      (concat
+        [body]
+        [ (include-js "http://d3js.org/d3.v3.min.js")
+          (include-js "https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.7.0/nv.d3.min.js")
+          (include-js "https://code.jquery.com/jquery-2.1.3.min.js")
+          (include-js "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js")
+          (include-js "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.2.2/js/material.min.js")]
+        (map include-js extra-js)
+        [(include-js "js/main.js")
+         (javascript-tag js)])]))
+</pre>
+</div>
+</div></li>
+
+<li><a id="sec-3-1-2-3"></a>Scatter plot page<br ><div class="outline-text-5" id="text-3-1-2-3">
+<p>
+An example page for a scatter plot. Uses the NVD3 page template.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defn scatter-plot-page []
+  (d3-page "Scatter Plot"
+    "web_plotter.scatter.scatter_plot();"
+    [:div.container
+     [:div.row
+      [:div.col-md-12
+       [:h1 "Scatter Plot"]]]
+     [:div.row
+      [:div.col-md-12
+       [:div#scatter.chart [:svg]]]]]))
+</pre>
+</div>
+</div></li></ol>
+</div>
+
+<div id="outline-container-sec-3-1-3" class="outline-4">
+<h4 id="sec-3-1-3"><span class="section-number-4">3.1.3</span> Routes</h4>
+<div class="outline-text-4" id="text-3-1-3">
+<p>
+Define the routes of the server via Compojure.
+</p>
+
+<p>
+The Compojure DSL allows to compose routes into a single Ring application handler. Common route definitions include
+the HTTP verb, a path, parameters and a response.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defroutes
+  site-routes
+  (GET "/" [] (index-page))
+  (GET "/scatter" [] (scatter-plot-page))
+  (GET "/scatter/data.json" [] (redirect "/data/census-race.json"))
+  (route/resources "/")
+  (route/not-found "Page not found"))
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>The root path will be redirected to the json data.</li>
+<li>The resources directory gets served as static files from the web server root path.</li>
+<li>If no matching route is found, return an error message.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-1-4" class="outline-4">
+<h4 id="sec-3-1-4"><span class="section-number-4">3.1.4</span> Request handling</h4>
+<div class="outline-text-4" id="text-3-1-4">
+<p>
+Set up the app request handler which was build with Compojure. Middlewares for serving static files, adding file
+info and setting content-type headers are wrapped around the handler.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(def app
+  (-&gt; (handler/site site-routes)
+    (wrap-file "resources")
+    (wrap-file-info)
+    (wrap-content-type)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Client</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Client side code.
+</p>
+</div>
+
+<div id="outline-container-sec-3-2-1" class="outline-4">
+<h4 id="sec-3-2-1"><span class="section-number-4">3.2.1</span> Core NVD3 helper functions</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+Namespace definition.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(ns web-plotter.core)
+</pre>
+</div>
+
+<p>
+Define two types for NVD3.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(deftype Group [key values])
+
+(deftype Point [x y size])
+</pre>
+</div>
+
+<p>
+A function to add a label to an axis.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defn add-label
+  [chart axis label]
+  (if-not (nil? label)
+    (.axisLabel (aget chart axis) label)))
+</pre>
+</div>
+
+<p>
+Add labels to both axes.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defn add-axes-labels
+  [chart x-label y-label]
+  (doto chart
+    (add-label "xAxis" x-label)
+    (add-label "yAxis" y-label)))
+</pre>
+</div>
+
+<p>
+Populating a chart with data and plotting it.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defn populate-node
+  [selector chart groups transition continuation]
+  (-&gt; (.select js/d3 selector)
+    (.datum groups)
+    (.transition)
+    (.duration 50000)
+    (.call chart)
+    (.call continuation)))
+</pre>
+</div>
+
+<p>
+Get data from an URL and create a plot with labelled axes from the data.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defn create-chart
+  [data-url selector make-chart json-&gt;groups &amp;
+   {:keys [transition continuation x-label y-label]
+    :or {transition false continuation (fn [_])
+         x-label nil, y-label nil}}]
+  (.json js/d3 data-url
+    (fn [error data]
+      (when data
+        (.addGraph js/nv
+          (fn [] (let [chart (make-chart)]
+                  (add-axes-labels chart x-label y-label)
+                  (populate-node selector chart (json-&gt;groups data)
+                    transition continuation)
+                  (.windowResize js/nv.utils #(.update chart)))))))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2-2" class="outline-4">
+<h4 id="sec-3-2-2"><span class="section-number-4">3.2.2</span> Scatter plots</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<div class="org-src-container">
+
+<pre class="src src-clojure">(ns web-plotter.scatter
+  (:require [web-plotter.core :as web-plotter]))
+
+(defn sum-by [key-fn coll]
+  (reduce + 0 (map key-fn coll)))
+
+(defn sum-values [key-fn coll]
+  (reduce
+    (fn [m [k vs]] (assoc m k (sum-by key-fn vs)))
+    {}
+    coll))
+
+
+(defn sum-data-fields [json]
+  (let [by-state (group-by #(.-state_name %) json)
+        white-by-state (sum-values #(.-white %) by-state)
+        afam-by-state (sum-values #(.-black %) by-state)
+        total-by-state (sum-values #(.-total %) by-state)]
+    (map #(hash-map :state %
+            :white (white-by-state %)
+            :black (afam-by-state %)
+            :total (total-by-state %))
+      (keys by-state))))
+
+(defn -&gt;nv [item]
+  (let [{:keys [white black]} item]
+    (web-plotter/Point. (/ white 1000) (/ black 1000) 1)))
+
+(defn -&gt;nv-data [key-name data]
+  (-&gt;&gt; data
+    sum-data-fields
+    (map -&gt;nv)
+    (apply array)
+    (web-plotter/Group. key-name)
+    (array)))
+
+(defn make-chart []
+  (let [c (-&gt; (.scatterChart js/nv.models)
+            (.showDistX true)
+            (.showDistY true)
+            (.useVoronoi false)
+            (.color (.. js/d3 -scale category10 range)))]
+    (.tickFormat (.-xAxis c) (.format js/d3 "d"))
+    (.tickFormat (.-yAxis c) (.format js/d3 "d"))
+    c))
+
+(defn ^:export scatter-plot []
+  (web-plotter/create-chart
+    "/scatter/data.json"
+    "#scatter svg"
+    make-chart
+    (partial -&gt;nv-data "Racial Data")
+    :x-label "Population, whites, by thousands"
+    :y-label "Population, African-Americans, by thousands"
+    :transition true))
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Appendix</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Ring concepts</h3>
+<div class="outline-text-3" id="text-4-1">
+<dl class="org-dl">
+<dt>Handlers</dt><dd>Ring handlers are Clojure functions taking a map representing the HTTP requests as an argument and
+return a map representing the HTTP response. Thus handlers transform requests into repsonses.
+(<a href="https://github.com/ring-clojure/ring/wiki/Concepts#requests">Request Map Reference</a>, <a href="https://github.com/ring-clojure/ring/wiki/Concepts#responses">Response Map Reference</a>).</dd>
+
+<dt>Middleware</dt><dd><p>
+Middleware are higher order functions taking a handler as an argument and returning a new,
+transformed handler. Middleware extends the handling of raw HTTP requests to add functionalities like request
+parameters, sessions, file uploading etc.
+</p>
+
+<p>
+Middleware example:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">;; defining the middleware
+(defn wrap-content-type [handler content-type]
+  (fn[request]
+    (let [response (handler request)]
+      (assoc-in response [:headers "Content-Type"] content-type))))
+
+;; wrapping the middleware around a handler
+(def app (wrap-content-type handler "text/html"))
+</pre>
+</div></dd>
+
+<dt>Adapters</dt><dd>Adapters connect Ring to web servers like Jetty, http-kit, etc.</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Nils Blum-Oeste</p>
+<p class="date">Created: 2015-02-08 So 10:13</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.3beta)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
